@@ -1,0 +1,11 @@
+Test accuracy before using expanded dataset
+Test acc: 0.864963503649635 (237/274)
+
+Test accuracy after using expanded dataset
+Test acc: 0.8211678832116789 (225/274)
+
+Test accuracy with all synthetic examples removed
+Test acc: 0.6458333333333334 (62/96)
+
+Test accuracy with additional colors added 
+Test acc: 0.6458333333333334 (62/96)
