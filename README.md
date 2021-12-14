@@ -11,4 +11,4 @@ Training should take approximately 3 minutes if a GPU is available. After this a
 6. To get the accuracy results on an entirely "real" dataset run the real_test.py with the following: 
 (If you get CUDA out of memory error you may need to run `nvidia-smi' get the process number taking the majority of the GPU memory and kill it with `kill <Proc #>`
 `python real_test.py VGG`
-7. To run the model in realtime run: `python webcam_detect.py'
+7. To run the model in realtime run: `python webcam_detect.py <VGG | ResNet>'
