@@ -19,70 +19,57 @@ from PIL import Image
 import glob
 import cv2
 
-filepath = 'ResNet.pth'
-torch.cuda.empty_cache()
-model = torch.load(filepath)
-
-class_names = ['with_mask',
-'with_mask_incorrect',
- 'without_mask'
-]
 
 
+class detector:
+		
+	def __init__(self,filepath):
+		self.filepath = filepath
+		self.model = torch.load(filepath)
+		self.class_names = ['with_mask',
+		'with_mask_incorrect',
+		 'without_mask'
+		]
+		
 
-def process_image(image):
-    ''' Scales, crops, and normalizes a PIL image for a PyTorch model,
-        returns an Numpy array
-    '''
+	def process_image(self,image):
+	    ''' Scales, crops, and normalizes a PIL image for a PyTorch model,
+		returns an Numpy array
+	    '''
+	    
+	    pil_image = image
+	   
+	    image_transforms = transforms.Compose([
+		transforms.Resize(256),
+		transforms.CenterCrop(224),
+		transforms.ToTensor(),
+		transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
+	    ])
+	    
+	    img = image_transforms(pil_image)
+	    return img
     
-    # TODO: Process a PIL image for use in a PyTorch model
-    #pil_image = Image.open(image)
-    pil_image = image
-   
-    image_transforms = transforms.Compose([
-        transforms.Resize(256),
-        transforms.CenterCrop(224),
-        transforms.ToTensor(),
-        transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
-    ])
-    
-    img = image_transforms(pil_image)
-    return img
-    
-    
+	def classify_face(self,image):
+	    device = torch.device("cpu")
+	    image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+	    im = Image.fromarray(image)
+	    image = self.process_image(im)
+	    print('image_processed')
+	    img = image.unsqueeze_(0)
+	    img = image.float()
+
+	    self.model.eval()
+	    self.model.to(device)
+	    output = self.model(image)
+	    print(output,'##############output###########')
+	    _, predicted = torch.max(output, 1)
+	    print(predicted.data[0],"predicted")
 
 
-def classify_face(image):
-    device = torch.device("cpu")
-    image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-    #im_pil = image.fromarray(image)
-    #image = np.asarray(im)
-    im = Image.fromarray(image)
-    image = process_image(im)
-    print('image_processed')
-    img = image.unsqueeze_(0)
-    img = image.float()
-
-    model.eval()
-    model.to(device)
-    output = model(image)
-    print(output,'##############output###########')
-    _, predicted = torch.max(output, 1)
-    print(predicted.data[0],"predicted")
-
-
-    classification1 = predicted.data[0]
-    index = int(classification1)
-    print(class_names[index])
-    return class_names[index]
-
-
-
-if __name__ == '__main__':
-    #map_location=torch.device('cpu')
-    image = cv2.imread('praj.jpg')
-    label = classify_face(image)
-    print("the label is", label)
+	    classification1 = predicted.data[0]
+	    index = int(classification1)
+	    print(self.class_names[index])
+	    return self.class_names[index]
 
 
 
