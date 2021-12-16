@@ -3,6 +3,8 @@ from torchvision import datasets, models, transforms
 import os
 import pandas as pd
 import sys
+import time
+from torchsummary import summary
 
 model_path = sys.argv[1]
 model = torch.load(model_path)
@@ -44,6 +46,7 @@ dataloader = torch.utils.data.DataLoader(image_dataset,
                                              shuffle=True, 
                                              num_workers=4) 
 model.to(device)
+summary(model, (3,224,224))
 model.eval()
 total_correct = 0
 total_tested = 0
@@ -53,12 +56,16 @@ images_shown = 0
 incorrect_labels = {x : 0 for x in class_names}
 l_count = {x:[0,0] for x in class_names}
 
+total_time = 0
+
 for inputs,labels in dataloader:
     inputs = inputs.to(device)
     labels = labels.to(device)
-    
+
+    since = time.time()
     outputs = model(inputs)
     _, preds = torch.max(outputs, 1)
+    total_time += time.time() - since
     for i,pred in enumerate(preds):
         if(pred != labels[i] and images_shown < 10):
             images_shown += 1
@@ -73,3 +80,5 @@ for inputs,labels in dataloader:
 print("Test acc: {} ({}/{})".format(float(total_correct)/float(total_tested),total_correct,total_tested))
 for class_name in class_names:
     print("{}/{} correct for {}".format(l_count[class_name][0],l_count[class_name][0]+l_count[class_name][1],class_name))
+
+print("Average inference time per image: {}".format(total_time/total_tested))
